@@ -1,0 +1,6 @@
+numpy
+sklearn
+gensim
+seaborn
+scipy
+sentence_transformers

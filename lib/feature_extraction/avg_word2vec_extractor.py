@@ -24,7 +24,7 @@ class Word2VecEncoder(object):
     def get_sentence_representation(self, sent):
         sent = sent.translate(TRANSLATE)
         tokens = [x.lower() for x in sent.split(' ') if len(x)]
-        tokens = [x for x in tokens if x in self.model.vocab]
+        tokens = [x for x in tokens if x in self.model.key_to_index]
         if len(tokens):
             return sum([self.model[x] for x in tokens])/len(tokens)
         else:

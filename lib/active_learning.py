@@ -56,18 +56,19 @@ class ActiveLearner:
         for ds in [self.test_ds, self.train_ds, self.pool_ds]:
             X, y = ds.get_labeled_entries()
             y = np.array(y, dtype=bool)
-            decision, predictions = get_decision(ds, self.model)
-            step_results['{}_loss'.format(ds.name)] = get_loss(decision, self.model.name)
-            step_results['{}_accuracy'.format(ds.name)] = sum([x > 0 for x in decision]) / len(decision)
-            step_results['{}_f1'.format(ds.name)] = f1_score(y, predictions >= 0)
-            step_results['{}_ROC'.format(ds.name)] = roc_auc_score(y, predictions)
+            if len(y):
+                decision, predictions = get_decision(ds, self.model)
+                step_results['{}_loss'.format(ds.name)] = get_loss(decision, self.model.name)
+                step_results['{}_accuracy'.format(ds.name)] = sum([x > 0 for x in decision]) / len(decision)
+                step_results['{}_f1'.format(ds.name)] = f1_score(y, predictions >= 0)
+                step_results['{}_ROC'.format(ds.name)] = roc_auc_score(y, predictions)
+    
+                if ds == self.train_ds:
+                    step_results['n_support_vecs'] = sum(decision <= 1)
 
-            if ds == self.train_ds:
-                step_results['n_support_vecs'] = sum(decision <= 1)
-
-            # Class confidence
-            step_results['{}_margin_1'.format(ds.name)] = predictions[y].mean()
-            step_results['{}_margin_0'.format(ds.name)] = -predictions[~y].mean()
+                # Class confidence
+                step_results['{}_margin_1'.format(ds.name)] = predictions[y].mean()
+                step_results['{}_margin_0'.format(ds.name)] = -predictions[~y].mean()
 
     def log_batch_metrics(self, ask_ids, step_results):
         X = self.X_train[ask_ids]
