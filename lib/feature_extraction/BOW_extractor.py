@@ -26,7 +26,7 @@ class BoWExtractor(object):
             features = self.vectorizer.fit_transform(sentences)
         else:
             features = self.vectorizer.transform(sentences)
-        res = normalize(features, norm='l1', axis=1)
+        res = normalize(features, norm='l2', axis=1)
         return res
 
     @staticmethod

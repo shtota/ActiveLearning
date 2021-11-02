@@ -58,7 +58,7 @@ class GloveEncoder(object):
             print("AvgGloveExtractor loading time: " + str(time.time() - start_time))
             GloveEncoder._backup = self.glove_model
         features = [self.get_sentence_representation(sent) for sent in sentences]
-        return normalize(np.array(features), norm='l1', axis=1)
+        return normalize(np.array(features), norm='l2', axis=1)
 
     @staticmethod
     def clear():

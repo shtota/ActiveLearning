@@ -41,7 +41,7 @@ class Word2VecEncoder(object):
             Word2VecEncoder._backup = self.model
         features = [self.get_sentence_representation(sent) for sent in sentences]
 
-        return normalize(np.array(features), norm='l1', axis=1)
+        return normalize(np.array(features), norm='l2', axis=1)
 
     @staticmethod
     def clear():

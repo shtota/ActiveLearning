@@ -19,6 +19,7 @@ class QueryStrategy(with_metaclass(ABCMeta, object)):
         self._dataset = dataset
         dataset.on_update(self.update)
         self.batch_size = kwargs.pop('batch_size', 1)
+        self.train_on_query = kwargs.pop('train_on_query', True)
 
     @property
     def dataset(self):

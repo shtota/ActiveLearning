@@ -94,7 +94,6 @@ class UncertaintySampling(QueryStrategy):
             raise TypeError(
                 "method 'entropy' requires model to be a ProbabilisticModel"
             )
-        self.train_on_query = kwargs.pop('train_on_query', True)
 
     def _get_scores(self):
         dataset = self.dataset
