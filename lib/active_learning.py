@@ -14,8 +14,7 @@ RESTARTS = 10
 
 
 class ActiveLearner:
-    def __init__(self, X_train, y_train, X_test, y_test, name: str, encoder_name: str,
-                 record_vectors: bool, batch_size=0.5, skip_existing=False):
+    def __init__(self, X_train, y_train, X_test, y_test, name: str, encoder_name: str, batch_size=0.5, skip_existing=False):
         self.X_train = X_train
         self.y_train = y_train
         self.core_ds = None
@@ -23,7 +22,6 @@ class ActiveLearner:
         self.test_ds = Dataset(X_test, y_test, 'test')
         self.dataset_name = name
         self.encoder_name = encoder_name
-        self.record_vectors = record_vectors
         if batch_size < 1:
             batch_size = ceil(X_train.shape[0] * 0.01 * batch_size)
         self.batch_size = batch_size
@@ -51,6 +49,7 @@ class ActiveLearner:
                 print('Received interrupt')
                 exit(0)
             except Exception as e:
+                raise e
                 with open('./errors.log', 'a') as f:
                    f.write('{} {} {} {} {} {}'.format(self.dataset_name, self.encoder_name,
                                                    self.strategy_name, self.model_name, self.round, e))
@@ -102,10 +101,6 @@ class ActiveLearner:
         round_labels = np.array([None] * len(self.y_train))
         round_labels[missing_idx] = self.y_train[missing_idx]
         self.pool_ds = Dataset(self.X_train, round_labels, 'pool')
-
-        self.previous_test_predictions = []
-        self.previous_pool_predictions = []
-        self.previous_core_predictions = []
 
     def _create_round_labels(self):
         random = np.random.RandomState(self.round)
@@ -191,4 +186,25 @@ class ActiveLearner:
                   'wb') as f:
             pickle.dump((test_score, current_model), f)
 
+    def _test(self):
+        if self.encoder_name == 'bow':
+            from scipy.sparse.linalg import norm
+        else:
+            from numpy.linalg import norm
+        from sklearn.preprocessing import normalize
+        scores = []
+        for i in ['0,01', '0,1', '1', '10', '100']:
+            self.model = model_factory('Regression{}'.format(i))
+            self.model.model.fit(self.X_train, self.y_train)
+            scores.append(round(self.model.score(self.test_ds), 2))
+        print(self.dataset_name, scores)
+        scores = []
 
+        self.X_train = normalize(self.X_train, norm='l1', axis=1)
+        for i in ['0,01', '0,1', '1', '10', '100']:
+            self.model = model_factory('Regression{}'.format(i))
+            self.model.model.fit(self.X_train, self.y_train)
+            scores.append(round(self.model.score(self.test_ds), 2))
+        print(self.dataset_name, scores)
+
+        return

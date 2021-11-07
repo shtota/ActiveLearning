@@ -4,7 +4,7 @@ import seaborn as sns
 import numpy as np
 
 from data_loader import load_train_test
-from feature_extraction import FastTextEncoder, GloveEncoder, BoWExtractor, CBOWEncoder, Word2VecEncoder
+from embeddings import FastTextEncoder, GloveEncoder, BoWExtractor, CBOWEncoder, Word2VecEncoder
 from sklearn import linear_model
 from sklearn.metrics import pairwise_distances
 from sklearn.mixture import GaussianMixture

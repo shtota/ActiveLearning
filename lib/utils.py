@@ -72,10 +72,10 @@ def model_factory(model_name):
 
 def get_all_models():
     all_models = ['Regression', 'RegressionStable', 'svmLinear', 'svmHinge']
-    all_regs = ['', '0,1', '10', 'L1']
+    all_regs = ['', '0,1', '10']
     all_models = [a + b for a, b in product(all_models, all_regs)]
-    all_models.remove('svmHingeL1')
-    all_models.remove('RegressionStableL1')
+    #all_models.remove('svmHingeL1')
+    #all_models.remove('RegressionStableL1')
     #all_models = all_models + ['RF']
     return all_models
 

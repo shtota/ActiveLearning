@@ -26,7 +26,7 @@ def encoded_filename(name):
 def data_filename(name, encoder):
     s = 'all'
     if encoder is not None:
-        s += '_' + encoder.name
+        s += '_' + str(encoder)
         s += '.np'
     else:
         s += '_data.csv'

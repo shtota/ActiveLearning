@@ -1,4 +1,4 @@
-from feature_extraction import BoWExtractor, Word2VecEncoder
+from embeddings import BoW
 from data_loader import load_train_test
 
 ALL_DATASETS = ['cornell-sent-polarity', 'cornell-sent-subjectivity', 'ag_news2', 'ag_news3', 'dbpedia3', 'dbpedia8']
@@ -7,17 +7,8 @@ DATASETS = ['cornell-sent-polarity', 'ag_news3', 'dbpedia3']
 HUE_ORDER = ['0,1', '1', '10', 'L1(C=1)']
 
 
-def get_baseline(ds):
-    #if ds in classification_dataset_names:
-        #return metadata[ds][0]
-    encoder = BoWExtractor()
-    _, X_train, X_test, y_train, y_test = load_train_test(ds, encoder, -1)
-    prop = sum(y_test)/len(y_test)
-    return max(prop, 1-prop)
-
-
 def get_labels(ds):
-    encoder = BoWExtractor()
+    encoder = BoW()
     _, X_train, X_test, y_train, y_test = load_train_test(ds, encoder, -1)
     return y_train
 
