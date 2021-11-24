@@ -14,14 +14,14 @@ RESTARTS = 10
 
 
 class ActiveLearner:
-    def __init__(self, X_train, y_train, X_test, y_test, name: str, encoder_name: str, batch_size=0.5, skip_existing=False):
+    def __init__(self, X_train, y_train, X_test, y_test, name: str, embedding_name: str, batch_size=0.5, skip_existing=False):
         self.X_train = X_train
         self.y_train = y_train
         self.core_ds = None
         self.pool_ds = None
         self.test_ds = Dataset(X_test, y_test, 'test')
         self.dataset_name = name
-        self.encoder_name = encoder_name
+        self.embedding_name = embedding_name
         if batch_size < 1:
             batch_size = ceil(X_train.shape[0] * 0.01 * batch_size)
         self.batch_size = batch_size
@@ -51,12 +51,12 @@ class ActiveLearner:
             except Exception as e:
                 raise e
                 with open('./errors.log', 'a') as f:
-                   f.write('{} {} {} {} {} {}'.format(self.dataset_name, self.encoder_name,
-                                                   self.strategy_name, self.model_name, self.round, e))
+                   f.write('{} {} {} {} {} {}'.format(self.dataset_name, self.embedding_name,
+                                                      self.strategy_name, self.model_name, self.round, e))
                 continue
 
     def run_one_round(self):
-        self.model = model_factory(self.model_name)
+        self.model = model_factory(self.model_name, self.embedding_name)
         self.model.train(self.core_ds)
         strategy_class = STRATEGY_NAME_TO_CLASS[self.strategy_name]
         strategy = strategy_class(self.core_ds, model=self.model, real_y=self.y_train,
@@ -64,7 +64,7 @@ class ActiveLearner:
 
         round_results = list()
         batches = ceil(sum(self.pool_ds.get_labeled_mask())/self.batch_size)
-        description = '{} {} {} {} {}'.format(self.round, self.strategy_name, self.dataset_name, self.encoder_name, self.model_name)
+        description = '{} {} {} {} {}'.format(self.round, self.strategy_name, self.dataset_name, self.embedding_name, self.model_name)
 
         for batch_no in tqdm(range(batches+1), description, batches):
             if batch_no:
@@ -88,7 +88,7 @@ class ActiveLearner:
         results.to_csv(self.csv_path(), index=False)
 
     def csv_path(self):
-        return os.path.join(CODE_DIR, 'results', self.encoder_name, self.dataset_name,
+        return os.path.join(CODE_DIR, 'results', self.embedding_name, self.dataset_name,
                             self.strategy_name + '_' + str(self.round) + '_' + self.model_name + '.csv')
 
     def initiate_core_set(self):
@@ -159,7 +159,7 @@ class ActiveLearner:
         step_results['ask_ids'] = ';'.join([str(x) for x in ask_ids])
 
     def get_kappa(self, ds, step_results, y_pred):
-        step_results['kappa_agreement_{}'.format(ds.name)] = 1
+        step_results['{}_kappa_agreement'.format(ds.name)] = 1
         if ds.name not in self.previous_predictions.keys():
             return
 
@@ -180,14 +180,14 @@ class ActiveLearner:
 
     def dump_vector(self, model_name, round_, core_size, test_score, current_model):
         # TODO: consider dumping vectors at each step
-        os.makedirs(os.path.join(CODE_DIR, 'vectors', self.encoder_name, self.dataset_name), exist_ok=True)
-        with open(os.path.join(CODE_DIR, 'vectors', self.encoder_name, self.dataset_name,
+        os.makedirs(os.path.join(CODE_DIR, 'vectors', self.embedding_name, self.dataset_name), exist_ok=True)
+        with open(os.path.join(CODE_DIR, 'vectors', self.embedding_name, self.dataset_name,
                                model_name + '_' + str(round_) + '_' + str(core_size).rjust(4, '0') + '.pkl'),
                   'wb') as f:
             pickle.dump((test_score, current_model), f)
 
     def _test(self):
-        if self.encoder_name == 'bow':
+        if self.embedding_name == 'bow':
             from scipy.sparse.linalg import norm
         else:
             from numpy.linalg import norm

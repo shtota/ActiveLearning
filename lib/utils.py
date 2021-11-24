@@ -38,7 +38,7 @@ class LogisticRegressionStable(ProbabilisticModel):
         return self.model.predict_proba(feature, *args, **kwargs)
 
 
-def model_factory(model_name):
+def model_factory(model_name, embedding='cbow'):
     kwargs = {'max_iter': 200000, 'name': model_name}
     if model_name.endswith('L1'):
         kwargs['penalty'] = 'l1'
@@ -52,7 +52,7 @@ def model_factory(model_name):
             kwargs['C'] = float(model_name[first_digit:].replace(',', '.'))
 
     if model_name.startswith('Regression'):
-        if model_name.endswith('L1'):
+        if model_name.endswith('L1') or embedding.startswith('bow'):
             kwargs['solver'] = 'liblinear'
         if model_name.startswith('RegressionStable'):
             kwargs['C'] *= 1000
@@ -72,7 +72,7 @@ def model_factory(model_name):
 
 def get_all_models():
     all_models = ['Regression', 'RegressionStable', 'svmLinear', 'svmHinge']
-    all_regs = ['', '0,1', '10']
+    all_regs = ['', '0,1', '10', '100', '1000']
     all_models = [a + b for a, b in product(all_models, all_regs)]
     #all_models.remove('svmHingeL1')
     #all_models.remove('RegressionStableL1')

@@ -41,11 +41,11 @@ def _load_df(name):
     return df
 
 
-def load_features_labels(name, encoder):
+def load_features_labels(name, encoder, override):
     df = _load_df(name)
     labels = df['target'].values
     filename = data_filename(name, encoder)
-    if os.path.exists(filename):
+    if os.path.exists(filename) and override is False:
         features = np.loadtxt(filename)
         #print(np.mean(np.linalg.norm(features, axis=0)))
         return features, labels
@@ -68,6 +68,7 @@ def clear_data(rows):
         texts.append(text)
     return texts, labels
 
+
 def load_texts(name):
     if name in WEIRD_DATASETS:
         res = []
@@ -84,7 +85,7 @@ def load_texts(name):
         df = _load_df(name)
         return list(df['text'])
 
-def load_train_test(name, encoder, downsample, train_size=0.6):
+def load_train_test(name, encoder, downsample=-1, train_size=0.6, override=False):
     if name in WEIRD_DATASETS:
         if name.startswith('mcauley'):
             return load_mcauley(encoder, name.endswith('biased'), bool(name.count('balanced')))
@@ -110,7 +111,7 @@ def load_train_test(name, encoder, downsample, train_size=0.6):
         y_test = labels
 
     else:
-        features, labels = load_features_labels(name, encoder)
+        features, labels = load_features_labels(name, encoder, override)
         X_train, X_test, y_train, y_test = train_test_split(features, labels, train_size=train_size, random_state=1)
         if downsample != -1 and name.startswith('dbpedia'):
             proportion = downsample

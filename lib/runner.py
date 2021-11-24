@@ -22,11 +22,12 @@ class Parser:
                             help='strategy name. if not provided all enc are used', nargs='+')
         parser.add_argument('--model', type=str, required=False, choices=get_all_models(), default=get_all_models(), nargs='+')
         #parser.add_argument('--regs', type=str, required=False, choices=[str(x) for x in [0.5, 0.7, 0.9, 1.1, 1.3, 1.5]], default=[], nargs='+')
-        parser.add_argument('--batch', type=float, required=False, default=0.5, help='batch size in % or samples')
+        parser.add_argument('--batch-size', type=float, required=False, default=0.5, help='batch size in % or samples')
         parser.add_argument('--skip', required=False, default=False, action='store_true', help='skip cfg if result exist')
         parser.add_argument('--downsample', required=False, default=-1)
         parser.add_argument('--round', type=int, required=False, default=0, help='start round')
         parser.add_argument('--normalization', required=False, default='l2', choices=['l2', 'l1'])
+        parser.add_argument('--override', required=False, default=False, action='store_true')
         args = parser.parse_args()
         names = args.name
         encoders = args.embedding
@@ -42,17 +43,16 @@ class Parser:
             models = [models]
         #if len(models) == 1 and len(args.regs):
         #    models = [models[0] + str(round(1/float(x), 2)).replace('.', ',') for x in args.regs]
-        return names, encoders, strategy, args.round, models, float(args.downsample), args.normalization, args.batch, args.skip
+        return names, encoders, strategy, args.round, models, float(args.downsample), args.normalization, args.batch_size, args.skip, args.override
 
 
 def main():
-    names, encoders, strategies, start_round, models, downsample, norm, batch_size, skip_existing = Parser.parse_args()
+    names, encoders, strategies, start_round, models, downsample, norm, batch_size, skip_existing, override = Parser.parse_args()
     a = time.time()
     for encoder_name in encoders:
         for dataset_name in names:
             encoder = ENCODER_NAME_TO_CLASS[encoder_name](norm=norm)
-            dataset_name, X_train, X_test, y_train, y_test = load_train_test(dataset_name, encoder, downsample)
-            #encoder.clear()
+            dataset_name, X_train, X_test, y_train, y_test = load_train_test(dataset_name, encoder, downsample,override=override)
 
             learner = ActiveLearner(X_train, y_train, X_test, y_test, dataset_name, str(encoder), batch_size, skip_existing)
             for model_name in models:
