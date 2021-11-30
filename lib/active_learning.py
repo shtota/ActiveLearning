@@ -83,7 +83,7 @@ class ActiveLearner:
                 self.model.train(self.core_ds)
 
             round_results.append(step_results)
-
+        print(round_results[-1])
         results = pd.DataFrame(data=round_results)
         results.to_csv(self.csv_path(), index=False)
 
@@ -168,7 +168,7 @@ class ActiveLearner:
         if ds == self.test_ds:
             if all(y_pred == previous_y):
                 return
-            step_results['kappa_agreement_{}'.format(ds.name)] = cohen_kappa_score(y_pred, previous_y, labels=[0, 1])
+            step_results['{}_kappa_agreement'.format(ds.name)] = cohen_kappa_score(y_pred, previous_y, labels=[0, 1])
             return
 
         relevant_idx = {x[0] for x in self.previous_predictions[ds.name]}.intersection(set(np.where(ds.get_labeled_mask())[0]))
@@ -176,7 +176,7 @@ class ActiveLearner:
         relevant_y = np.array([y for index, y in zip(np.where(ds.get_labeled_mask())[0], y_pred) if index in relevant_idx])
         if all(relevant_y == relevant_old_y):
             return
-        step_results['kappa_agreement_{}'.format(ds.name)] = cohen_kappa_score(relevant_old_y, relevant_y, labels=[0, 1])
+        step_results['{}_kappa_agreement'.format(ds.name)] = cohen_kappa_score(relevant_old_y, relevant_y, labels=[0, 1])
 
     def dump_vector(self, model_name, round_, core_size, test_score, current_model):
         # TODO: consider dumping vectors at each step

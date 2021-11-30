@@ -74,6 +74,8 @@ class RealLossSampling(QueryStrategy):
         if self.train_on_query:
             self.model.train(dataset)
         unlabeled_entry_ids, X_pool = dataset.get_unlabeled_entries()
+        if self.batch_size > len(unlabeled_entry_ids):
+            return list(unlabeled_entry_ids)
         dvalue = self.model.predict_proba(X_pool)
         loss = [1-dvalue[i, self.y[unlabeled_entry_ids[i]]] for i in range(len(dvalue))]
 

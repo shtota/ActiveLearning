@@ -14,7 +14,7 @@ class Parser:
     @staticmethod
     def parse_args():
         parser = argparse.ArgumentParser(description='Hi')
-        parser.add_argument('--name', type=str, required=False, default=DATASETS,
+        parser.add_argument('--name', type=str, required=False, default=DATASETS, choices=DATASETS,
                             help='dataset name. if not provided all datasets are used', nargs='+')
         parser.add_argument('--embedding', type=str, required=False, choices=ALL_EMBEDDINGS, default=ALL_EMBEDDINGS,
                             help='embedding name. if not provided all embeddings are used', nargs='+')

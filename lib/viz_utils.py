@@ -1,16 +1,7 @@
-from embeddings import BoW
-from data_loader import load_train_test
-
 ALL_DATASETS = ['cornell-sent-polarity', 'cornell-sent-subjectivity', 'ag_news2', 'ag_news3', 'dbpedia3', 'dbpedia8']
 DATASETS = ['cornell-sent-polarity', 'ag_news3', 'dbpedia3']
 #BIG_DATASETS = ['ag_news2_big', 'ag_news3_big', 'dbpedia3_big', 'dbpedia8_big']
 HUE_ORDER = ['strong', 'medium', 'weak']
-
-
-def get_labels(ds):
-    encoder = BoW()
-    _, X_train, X_test, y_train, y_test = load_train_test(ds, encoder, -1)
-    return y_train
 
 
 def reg_map(x):
@@ -30,6 +21,9 @@ def reg_map(x):
 
 def regularization_to_string(model_name, norm_type):
     mapping = {'0,1': 'weak', '1': 'medium', '10': 'strong'}
+    if model_name.startswith('Regression'):
+        mapping = {'0,01': 'weak', '0,1': 'medium', '1': 'strong'}
+        
     c = reg_map(model_name)
     if norm_type == 'l1':
         mapping = {'0,001': 'weak', '0,01': 'medium', '0,1': 'strong'}
